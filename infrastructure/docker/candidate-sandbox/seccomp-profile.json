@@ -1,0 +1,56 @@
+{
+  "defaultAction": "SCMP_ACT_ALLOW",
+  "architectures": [
+    "SCMP_ARCH_X86_64",
+    "SCMP_ARCH_X86",
+    "SCMP_ARCH_AARCH64"
+  ],
+  "syscalls": [
+    {
+      "names": [
+        "mount",
+        "umount2",
+        "pivot_root",
+        "swapon",
+        "swapoff",
+        "reboot",
+        "sethostname",
+        "setdomainname",
+        "iopl",
+        "ioperm",
+        "create_module",
+        "init_module",
+        "delete_module",
+        "get_kernel_syms",
+        "query_module",
+        "quotactl",
+        "nfsservctl",
+        "getpmsg",
+        "putpmsg",
+        "afs_syscall",
+        "tuxcall",
+        "security",
+        "perf_event_open",
+        "kexec_load",
+        "kexec_file_load",
+        "bpf",
+        "ptrace",
+        "personality",
+        "userfaultfd",
+        "open_by_handle_at",
+        "clock_settime",
+        "settimeofday",
+        "stime",
+        "acct"
+      ],
+      "action": "SCMP_ACT_ERRNO"
+    },
+    {
+      "names": [
+        "chroot"
+      ],
+      "action": "SCMP_ACT_ERRNO",
+      "comment": "Prevent chroot escapes"
+    }
+  ]
+}

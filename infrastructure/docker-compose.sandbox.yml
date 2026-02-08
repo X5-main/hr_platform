@@ -1,0 +1,86 @@
+version: '3.8'
+
+services:
+  candidate-sandbox:
+    build:
+      context: ./docker/candidate-sandbox
+      dockerfile: Dockerfile
+      target: hardened
+    image: candidate-sandbox:latest
+    container_name: candidate-sandbox-dev
+
+    # Security configuration
+    security_opt:
+      - no-new-privileges:true
+      - seccomp:./docker/candidate-sandbox/seccomp-profile.json
+      - apparmor:candidate-sandbox
+
+    # Capabilities
+    cap_drop:
+      - ALL
+    cap_add:
+      - CHOWN
+      - SETGID
+      - SETUID
+      - DAC_OVERRIDE
+
+    # Resource limits
+    deploy:
+      resources:
+        limits:
+          cpus: '2.0'
+          memory: 4G
+        reservations:
+          cpus: '0.5'
+          memory: 512M
+
+    # Storage
+    read_only: true
+    tmpfs:
+      - /tmp:rw,noexec,nosuid,size=100m
+      - /var/tmp:rw,noexec,nosuid,size=50m
+      - /run:rw,noexec,nosuid,size=10m
+    volumes:
+      - sandbox-workspace:/workspace:rw
+      - sandbox-home:/home/candidate:rw
+
+    # Network
+    networks:
+      - sandbox-network
+
+    # Environment
+    environment:
+      - DISPLAY=:1
+      - HOME=/home/candidate
+      - USER=candidate
+      - SESSION_ID=dev-session
+      - APPLICATION_ID=dev-app
+      - CANDIDATE_ID=dev-candidate
+
+    # Ports
+    ports:
+      - "8080:8080"  # code-server
+      - "5901:5901"  # VNC
+      - "6080:6080"  # noVNC
+
+    # Health check
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+      interval: 30s
+      timeout: 5s
+      start_period: 10s
+      retries: 3
+
+    # Restart policy
+    restart: unless-stopped
+
+volumes:
+  sandbox-workspace:
+    driver: local
+  sandbox-home:
+    driver: local
+
+networks:
+  sandbox-network:
+    driver: bridge
+    internal: false
